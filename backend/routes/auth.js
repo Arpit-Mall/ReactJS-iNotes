@@ -1,5 +1,4 @@
 const express = require("express");
-const UserScma = require("../models/UserSchema");
 const router = express.Router();
 const { body, validationResult } = require("express-validator");
 const UserSchema = require("../models/UserSchema");
@@ -38,7 +37,7 @@ router.post("/createuser",
           const Secpass= await bcrypt.hash(req.body.password,salt);   
           
           // Create a new user
-          user = await UserScma.create({
+          user = await UserSchema.create({
               name: req.body.name,
               email: req.body.email,
               password: Secpass})
