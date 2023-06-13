@@ -17,11 +17,14 @@ router.post("/createuser",
     body("email", "Enter a valid email").isEmail(),
     body("password", "Password must be atleast 5 characters").isLength({ min: 4 }),
   ], async(req, res) => {
+
+    let success = false;
+
     // If there are errors, return Bad request and the errors
     const error = validationResult(req);
     if (!error.isEmpty()) 
      {
-         return res.status(400).json({ error: error.array() });
+         return res.status(400).json({ success, error: error.array() });
      }
     // console.log(req.body);
 
@@ -30,7 +33,7 @@ router.post("/createuser",
           let user = await UserSchema.findOne({email:req.body.email});
           if(user)
             {
-              return res.status(400).json({ error:"Sorry a user with this email already exist"});
+              return res.status(400).json({ success, error:"Sorry a user with this email already exist"});
             }
 
           const salt = await bcrypt.genSalt(10);
@@ -48,7 +51,9 @@ router.post("/createuser",
             }
           }
           const authToken =jwt.sign(data,JWT_SEC);
-          res.send({authToken})  
+          
+          success=true;
+          res.send({success,authToken})  
           // res.send(user);
         } 
     catch (error) 
@@ -67,6 +72,8 @@ router.post("/login",
   body("password","Password cannot be blank").exists()
 ],async(req,res) => {
   
+  let success = false;
+
   // If there are errors, return Bad request and the errors
   const error = validationResult(req);
   if (!error.isEmpty()) 
@@ -86,7 +93,7 @@ router.post("/login",
       const passwordCompare = await bcrypt.compare(password,user.password);
       if(!passwordCompare)
         {
-          return res.status(400).json({error:"Please try to login with correct credentials"});
+          return res.status(400).json({success,error:"Please try to login with correct credentials"});
         }
 
       const data = {
@@ -96,7 +103,8 @@ router.post("/login",
       }
       
       const authToken = jwt.sign(data,JWT_SEC);
-      res.json({authToken});
+      success=true;
+      res.json({success,authToken});
     } 
   catch (error)
     {
